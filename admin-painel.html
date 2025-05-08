@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BARBER STUDIO - Painel Administrativo</title>
+    <style>
+        :root {
+            --primary-color: #333;
+            --secondary-color: #f4f4f4;
+            --accent-color: #d9534f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--secondary-color);
+            line-height: 1.6;
+        }
+
+        .admin-container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 2rem auto;
+            background-color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .admin-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-tabs {
+            display: flex;
+            background-color: #f0f0f0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .admin-tabs button {
+            flex-grow: 1;
+            padding: 1rem;
+            border: none;
+            background-color: #f0f0f0;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .admin-tabs button.active {
+            background-color: white;
+            border-bottom: 3px solid var(--primary-color);
+        }
+
+        .admin-content {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #555;
+        }
+
+        .btn-danger {
+            background-color: var(--accent-color);
+        }
+
+        .btn-danger:hover {
+            background-color: #c9302c;
+        }
+
+        .feedback {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem;
+            border-radius: 4px;
+            color: white;
+            z-index: 1000;
+        }
+
+        .feedback-success {
+            background-color: #28a745;
+        }
+
+        .feedback-error {
+            background-color: #dc3545;
+        }
+
+        .image-upload-preview {
+            max-width: 300px;
+            max-height: 200px;
+            margin-top: 1rem;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <h1>Painel Administrativo - BARBER STUDIO</h1>
+            <button class="btn btn-danger" onclick="logout()">Sair</button>
+        </header>
+
+        <div class="admin-tabs">
+            <button onclick="openTab('conteudo')" class="active">Conteúdo</button>
+            <button onclick="openTab('servicos')">Serviços</button>
+            <button onclick="openTab('imagens')">Imagens</button>
+            <button onclick="openTab('agendamentos')">Agendamentos</button>
+        </div>
+
+        <div class="admin-content">
+            <!-- Conteúdo -->
+            <div id="conteudo" class="tab-content active">
+                <h2>Edição de Conteúdo</h2>
+                
+                <div class="form-group">
+                    <label>Título Principal</label>
+                    <input type="text" id="hero-title" class="form-control" 
+                           placeholder="Estilo Definido Pela Precisão">
+                    <button class="btn mt-2" onclick="salvarConteudo('hero-title')">Salvar Título</button>
+                </div>
+
+                <div class="form-group">
+                    <label>Subtítulo</label>
+                    <textarea id="hero-subtitle" class="form-control" 
+                              placeholder="Descrição do serviço"></textarea>
+                    <button class="btn mt-2" onclick="salvarConteudo('hero-subtitle')">Salvar Subtítulo</button>
+                </div>
+
+                <div class="form-group">
+                    <label>Texto Sobre Nós</label>
+                    <textarea id="about-text" class="form-control" 
+                              rows="4" placeholder="História da barbearia"></textarea>
+                    <button class="btn mt-2" onclick="salvarConteudo('about-text')">Salvar Texto</button>
+                </div>
+            </div>
+
+            <!-- Serviços -->
+            <div id="servicos" class="tab-content">
+                <h2>Gerenciamento de Serviços</h2>
+                
+                <div class="form-group">
+                    <label>Novo Serviço</label>
+                    <input type="text" id="novo-servico-nome" class="form-control" placeholder="Nome do Serviço">
+                    <input type="number" id="novo-servico-preco" class="form-control mt-2" placeholder="Preço">
+                    <textarea id="novo-servico-descricao" class="form-control mt-2" placeholder="Descrição do Serviço"></textarea>
+                    <button class="btn mt-2" onclick="adicionarServico()">Adicionar Serviço</button>
+                </div>
+
+                <div id="lista-servicos">
+                    <!-- Serviços serão listados aqui dinamicamente -->
+                </div>
+            </div>
+
+            <!-- Imagens -->
+            <div id="imagens" class="tab-content">
+                <h2>Galeria de Imagens</h2>
+                
+                <div class="form-group">
+                    <label>Upload de Imagem</label>
+                    <input type="file" id="upload-imagem" class="form-control" accept="image/*">
+                    <img id="preview-imagem" class="image-upload-preview" style="display:none;">
+                    <button class="btn mt-2" onclick="uploadImagem()">Enviar Imagem</button>
+                </div>
+
+                <div id="galeria-imagens">
+                    <!-- Imagens serão mostradas aqui -->
+                </div>
+            </div>
+
+            <!-- Agendamentos -->
+            <div id="agendamentos" class="tab-content">
+                <h2>Gerenciamento de Agendamentos</h2>
+                
+                <div id="lista-agendamentos">
+                    <!-- Agendamentos serão listados aqui -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulação de backend (em um ambiente real, seria substituído por chamadas de API)
+        class AdminManager {
+            constructor() {
+                this.servicos = JSON.parse(localStorage.getItem('servicos')) || [];
+                this.agendamentos = JSON.parse(localStorage.getItem('agendamentos')) || [];
+                this.imagens = JSON.parse(localStorage.getItem('imagens')) || [];
+            }
+
+            // Métodos de validação
+            sanitizeInput(input) {
+                const div = document.createElement('div');
+                div.textContent = input;
+                return div.innerHTML.trim();
+            }
+
+            // Métodos de serviços
+            adicionarServico(nome, preco, descricao) {
+                if (!nome || !preco) {
+                    this.mostrarFeedback('Nome e preço são obrigatórios', 'error');
+                    return false;
+                }
+
+                const novoServico = {
+                    id: Date.now(),
+                    nome: this.sanitizeInput(nome),
+                    preco: parseFloat(preco),
+                    descricao: this.sanitizeInput(descricao)
+                };
+
+                this.servicos.push(novoServico);
+                this.salvarServicos();
+                this.renderizarServicos();
+                return true;
+            }
+
+            salvarServicos() {
+                localStorage.setItem('servicos', JSON.stringify(this.servicos));
+            }
+
+            renderizarServicos() {
+                const listaServicos = document.getElementById('lista-servicos');
+                listaServicos.innerHTML = this.servicos.map(servico => `
+                    <div class="servico-item">
+                        <h3>${servico.nome}</h3>
+                        <p>R$ ${servico.preco.toFixed(2)}</p>
+                        <p>${servico.descricao}</p>
+                        <button onclick="adminManager.removerServico(${servico.id})" class="btn btn-danger">Remover</button>
+                    </div>
+                `).join('');
+            }
+
+            removerServico(id) {
+                this.servicos = this.servicos.filter(servico => servico.id !== id);
+                this.salvarServicos();
+                this.renderizarServicos();
+            }
+
+            // Métodos de imagem
+            uploadImagem(file) {
+                if (!file) {
+                    this.mostrarFeedback('Nenhuma imagem selecionada', 'error');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imagem = {
+                        id: Date.now(),
+                        src: e.target.result
+                    };
+                    this.imagens.push(imagem);
+                    localStorage.setItem('imagens', JSON.stringify(this.imagens));
+                    this.renderizarImagens();
+                };
+                reader.readAsDataURL(file);
+            }
+
+            renderizarImagens() {
+                const galeriaImagens = document.getElementById('galeria-imagens');
+                galeriaImagens.innerHTML = this.imagens.map(imagem => `
+                    <div class="imagem-item">
+                        <img src="${imagem.src}" style="max-width: 200px; margin: 10px;">
+                        <button onclick="adminManager.removerImagem(${imagem.id})" class="btn btn-danger">Remover</button>
+                    </div>
+                `).join('');
+            }
+
+            removerImagem(id) {
+                this.imagens = this.imagens.filter(imagem => imagem.id !== id);
+                localStorage.setItem('imagens', JSON.stringify(this.imagens));
+                this.renderizarImagens();
+            }
+
+            // Métodos de feedback
+            mostrarFeedback(mensagem, tipo = 'success') {
+                const feedbackEl = document.createElement('div');
+                feedbackEl.textContent = mensagem;
+                feedbackEl.classList.add('feedback', `feedback-${tipo}`);
+                document.body.appendChild(feedbackEl);
+
+                setTimeout(() => {
+                    document.body.removeChild(feedbackEl);
+                }, 3000);
+            }
+        }
+
+        // Inicialização
+        const adminManager = new AdminManager();
+
+        // Funções de interface
+        function openTab(tabName) {
+            // Esconde todos os conteúdos
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Esconde todos os botões ativos
+            document.querySelectorAll('.admin-tabs button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Mostra o conteúdo selecionado
+            document.getElementById(tabName).classList.add('active');
+            document.querySelector(`.admin-tabs button[onclick="openTab('${tabName}')"]`).classList.add('active');
+        }
+
+        function salvarConteudo(elementId) {
+            const elemento = document.getElementById(elementId);
+            const novoConteudo = elemento.value;
+
+            if (!novoConteudo) {
+                adminManager.mostrarFeedback('O conteúdo não pode estar vazio', 'error');
+                return;
+            }
+
+            localStorage.setItem(elementId, novoConteudo);
+            adminManager.mostrarFeedback('Conteúdo salvo com sucesso!');
+            elemento.value = '';
+        }
+
+        function adicionarServico() {
+            const nome = document.getElementById('novo-servico-nome').value;
+            const preco = document.getElementById('novo-servico-preco').value;
+            const descricao = document.getElementById('novo-servico-descricao').value;
+
+            if (adminManager.adicionarServico(nome, preco, descricao)) {
+                // Limpa os campos após adicionar
+                document.getElementById('novo-servico-nome').value = '';
+                document.getElementById('novo-servico-preco').value = '';
+                document.getElementById('novo-servico-descricao').value = '';
+            }
+        }
+
+        function uploadImagem() {
+            const inputImagem = document.getElementById('upload-imagem');
+            const previewImagem = document.getElementById('preview-imagem');
+            
+            if (inputImagem.files && inputImagem.files[0]) {
+                const file = inputImagem.files[0];
+                
+                // Preview da imagem
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewImagem.src = e.target.result;
+                    previewImagem.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+
+                // Upload
+                adminManager.uploadImagem(file);
+                inputImagem.value = ''; // Limpa o input
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            window.location.href = 'login.html';
+        }
+
+        // Carrega dados salvos
+        window.onload = function() {
+            // Renderiza serviços salvos
+            adminManager.renderizarServicos();
+            
+            // Renderiza imagens salvas
+            adminManager.renderizarImagens();
+
+            // Recupera conteúdos salvos
+            const conteudos = ['hero-title', 'hero-subtitle', 'about-text'];
+            conteudos.forEach(id => {
+                const conteudoSalvo = localStorage.getItem(id);
+                if (conteudoSalvo) {
+                    document.getElementById(id).value = conteudoSalvo;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
